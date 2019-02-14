@@ -1,5 +1,5 @@
 # Written by -  Brian Trost, trostb@gmail.com
-# Description - Get interface IP address
+# Description - Get firewall info through panorama
 # Date - February 13th, 2019
 
 import string, getpass, argparse, urllib3, ssl, os, sys, requests
@@ -74,7 +74,7 @@ def main():
     showcmd = {'type':'op', 'cmd':cmd, 'key':apikey}
 
     url = "https://%s/api" % querytarget
-    print "Querying device " + querytarget + "\n"
+    print "Target device " + querytarget + "\n"
 
     showsysteminfoxml = ET.fromstring(send_api_request(url,showcmd))
     model = showsysteminfoxml.find('result').find('system').find('model').text

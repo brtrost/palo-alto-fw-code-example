@@ -29,3 +29,16 @@
 
      Firewall2 - 007xxxxxxxxx - 192.168.1.2 - PA-7080
 
+  retkey.py
+
+   This file can be 'import'ed and retrieves a API key from the user's home directory in .panconfkeystore.  Can be useful so one doesn't have to store API keys a program.
+
+     try:
+         import retkey
+     except:
+         pass
+
+     try:
+         retkey.read_key_file("x.x.x.x")
+     except:
+         apikey = args.apikey    # If you're passing by args  
