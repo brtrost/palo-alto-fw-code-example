@@ -1,4 +1,4 @@
-# Written by -  Brian Trost, btrost@paloaltonetworks.com
+# Written by -  Brian Trost, trostb@gmail.com
 # Description - Get API key from file
 # Date - February 14th, 2019
 

@@ -10,7 +10,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Handler for the command line arguments, if used.
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--querytarget", help="IP address of the panorama")
-parser.add_argument("-i", "--interface", help="Interface")
 parser.add_argument("-k", "--apikey", help="API Key")
 parser.add_argument("-u", "--username", help="User login")
 parser.add_argument("-p", "--password", help="Login password")
