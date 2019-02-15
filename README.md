@@ -1,5 +1,9 @@
   Brian Trost, trostb@gmail.com
 
+  python panfw-base-script.py
+
+    This script is a template that can be used for Palo Alto API scripting using Python.
+
   python show-arp.py -f x.x.x.x -i ae3.125
 
     Displays arp output of a single firewall or interface.  Script can be modified to do other op commands from the firewall.
