@@ -2,10 +2,19 @@
 # Description - Get firewall info through panorama
 # Date - February 13th, 2019
 
-import string, getpass, argparse, urllib3, ssl, os, sys, requests
-from xml.dom import minidom
+import string
+import getpass
+import argparse
+import urllib3
+import ssl
+import os
+import sys
+import requests
 import xml.etree.ElementTree as ET
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+if sys.version_info[0] < 3:
+    raise Exception("Must be using Python 3")
 
 # Handler for the command line arguments, if used.
 parser = argparse.ArgumentParser()
@@ -18,9 +27,10 @@ args = parser.parse_args()
 if args.querytarget:
     querytarget = args.querytarget
 else:
-    querytarget = raw_input("Enter the IP of the panorama: ")
+    querytarget = input("Enter the IP of the panorama: ")
 
-def printdes(s,o=''):
+
+def printdes(s, o=''):
     print ("\n  " + sys.argv[0] + " - " + s)
     olist = o.split(",")
     if 'printul' in olist:
@@ -29,6 +39,7 @@ def printdes(s,o=''):
     else:
         print("")
 
+
 def send_api_request(url, values):
     try:
         response = requests.get(url, params=values, verify=False)
@@ -36,15 +47,16 @@ def send_api_request(url, values):
     except:
         raise ValueError("API call not successful.")
 
+
 def get_api_key(hostname, username, password):
     try:
         url = 'https://' + hostname + '/api'
         values = {'type': 'keygen', 'user': username, 'password': password}
         response = requests.get(url, params=values, verify=False)
-        parsedresponse = minidom.parseString(response.text)
-        return parsedresponse.getElementsByTagName('key')[0].firstChild.nodeValue
+        return ET.fromstring(response.text).find('.//result/key').text
     except:
-        raise ValueError("Unable to generate API key from panorama.")
+        raise ValueError("Unable to generate API key from firewall.")
+
 
 def fetch_api_key():
     try:
@@ -54,40 +66,41 @@ def fetch_api_key():
             if args.username:
                 username = args.username
             else:
-                username = raw_input("Enter the user login:  ")
+                username = input("Enter the user login:  ")
             if args.password:
                 password = args.password
             else:
                 password = getpass.getpass(prompt="Enter the password:  ")
 
-            return get_api_key(querytarget,username,password)
+            return get_api_key(querytarget, username, password)
     except:
         raise ValueError("Unable to obtain API key from program arguments or panorama.")
+
 
 def main():
 
     apikey = fetch_api_key()
-    printdes("show devices and check zone settings",o='printul')
+    printdes("show devices and check zone settings", o='printul')
 
     cmd = '<show><system><info></info></system></show>'
-    showcmd = {'type':'op', 'cmd':cmd, 'key':apikey}
+    showcmd = {'type': 'op', 'cmd': cmd, 'key': apikey}
 
     url = "https://%s/api" % querytarget
-    print "Target device " + querytarget + "\n"
+    print ("Target device " + querytarget + "\n")
 
-    showsysteminfoxml = ET.fromstring(send_api_request(url,showcmd))
+    showsysteminfoxml = ET.fromstring(send_api_request(url, showcmd))
     model = showsysteminfoxml.find('result').find('system').find('model').text
 
-    panoramamodel = ['M-100','M-500','M-200','M-600']
+    panoramamodel = ['M-100', 'M-500', 'M-200', 'M-600']
 
     if model in panoramamodel:
         cmd = '<show><devices><connected></connected></devices></show>'
-        renamedict = {'type':'op', 'cmd':cmd, 'key':apikey}
+        renamedict = {'type': 'op', 'cmd': cmd, 'key': apikey}
 
         url = "https://%s/api" % querytarget
-        print "Querying...." + url + "\n"
+        print ("Querying...." + url + "\n")
 
-        showconn = ET.fromstring(send_api_request(url,renamedict))
+        showconn = ET.fromstring(send_api_request(url, renamedict))
 
         for child in showconn.findall('.//devices/entry'):
             serial = child.find('serial').text
@@ -99,19 +112,22 @@ def main():
 
             if state == 'active':
                 xpath = '/config/devices/entry[@name=\'localhost.localdomain\']/vsys'
-                lookupdict = {'type': 'config', 'action': 'get', 'key':apikey, 'xpath':xpath, 'target':serial}
+                lookupdict = {'type': 'config', 'action': 'get',
+                              'key': apikey, 'xpath': xpath, 'target': serial}
                 zpp = ''
 
                 url = "https://%s/api" % querytarget
-                print("%s - %s - %s - %s\n" % (hostname,serial,hip,model))
-                y = ET.fromstring(send_api_request(url,lookupdict).encode('utf-8'))
+                print("%s - %s - %s - %s\n" % (hostname, serial, hip, model))
+                y = ET.fromstring(send_api_request(url, lookupdict).encode('utf-8'))
                 print(" Finding VSYS")
 
                 for vsysentry in y.findall('.//vsys/entry'):
-                    print(" - Found VSYS entry %s - %s" % (vsysentry.get('name'),vsysentry.find('display-name').text))
+                    print(" - Found VSYS entry %s - %s" %
+                          (vsysentry.get('name'), vsysentry.find('display-name').text))
                 print("")
     else:
         print("Not a panorama device, exiting.\n")
+
 
 if __name__ == '__main__':
     main()
