@@ -35,7 +35,7 @@
 
   retkey.py
 
-   This file can be 'import'ed and retrieves a API key from the user's home directory in .panconfkeystore.  Can be useful so one doesn't have to store API keys a program.  The source file can be changed and is expecting text in the '<ip>:<apikey>' format with one per line.  This file is the PAN-C API key storage location.
+   This file can be 'import'ed and retrieves a API key from the user's home directory in .panconfkeystore.  Can be useful so one doesn't have to store API keys in a program.  The source file can be changed and is expecting text in the '< ip > : < apikey >' format with one per line.  This file is the PAN-C API key storage location.
 
      try:
          import retkey
